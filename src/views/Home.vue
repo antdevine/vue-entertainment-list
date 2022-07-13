@@ -1,7 +1,19 @@
 <template>
   <main>
+    <form id="category">
+      <div v-for="(category, index) in this.categoriesOptions" :key="index">
+        <input type="radio" :value="category" :id="category" name="category" v-model="entertainmentCategory" required /> {{ category }}
+      </div>
+        <input type="button" value="Submit category" @click="categorySelection" />
+        <input type="button" value="Clear filters" @click="clearFilters" />
+    </form>
+
     <RouterLink :to="{ path: `/movie/${index}`}" v-for="(movie, index) in this.movieData" :key="index">
-      <MovieList :movieid="index" :movieTitle="movie.title" :movieImg="movie.thumbnail.regular.medium" />
+      <MovieList 
+      :movieid="index" 
+      :movieTitle="movie.title" 
+      :movieImg="movie.thumbnail.regular.medium" 
+      />
     </RouterLink>
   </main>
 </template>
@@ -16,6 +28,7 @@ import { RouterLink, RouterView } from 'vue-router';
     },
     data() {
       return {
+        entertainmentCategory: '',
         movieData: [
           {
             "title": "Beyond Earth",
@@ -473,7 +486,30 @@ import { RouterLink, RouterView } from 'vue-router';
             "isTrending": false
           }
         ],
+        categoriesOptions: [],
+        filteredMovies: [],
+        preFilter: [],
       }
-    }
+    },
+    methods: {
+      categoriesList() {
+        let categories = this.movieData.map((movie) => movie.category);
+        this.categoriesOptions = [...new Set(categories)];
+      },
+      categorySelection() {
+        this.preFilter = this.movieData;
+        const categorySelection = this.movieData.filter(movie => {
+          return movie.category === this.entertainmentCategory;
+        });
+        this.filteredMovies = categorySelection;
+        this.movieData = this.filteredMovies;
+      },
+      clearFilters() {
+        this.movieData = this.preFilter;
+      }
+    },
+    beforeMount() {
+      this.categoriesList();
+    },
   }
 </script>
