@@ -1,20 +1,30 @@
 <template>
   <main>
     <form id="category">
+      <h3>Categories</h3>
       <div v-for="(category, index) in this.categoriesOptions" :key="index">
         <input type="radio" :value="category" :id="category" name="category" v-model="entertainmentCategory" required /> {{ category }}
       </div>
-        <input type="button" value="Submit category" @click="categorySelection" />
-        <input type="button" value="Clear filters" @click="clearFilters" />
     </form>
 
-    <RouterLink :to="{ path: `/movie/${index}`}" v-for="(movie, index) in this.movieData" :key="index">
+    <form id="ratings">
+      <h3>Ratings</h3>
+      <div v-for="(rating, index) in this.ratingsOptions" :key="index">
+        <input type="radio" :value="rating" :id="rating" name="rating" v-model="entertainmentRating" required /> {{ rating }}
+      </div>
+    </form>
+
+    <input type="button" value="Clear filters" @click="clearFilters" />
+    <input type="button" value="Submit filter" @click="filterSelection" />
+
+    <RouterLink :to="{ path: `/movie/${index}`}" v-for="(movie, index) in this.feedData" :key="index">
       <MovieList 
       :movieid="index" 
       :movieTitle="movie.title" 
       :movieImg="movie.thumbnail.regular.medium" 
       />
     </RouterLink>
+    <p v-if="this.feedData.length == 0">No movies in this filter, please clear filter and try again</p>
   </main>
 </template>
 
@@ -29,6 +39,7 @@ import { RouterLink, RouterView } from 'vue-router';
     data() {
       return {
         entertainmentCategory: '',
+        entertainmentRating: '',
         movieData: [
           {
             "title": "Beyond Earth",
@@ -487,8 +498,9 @@ import { RouterLink, RouterView } from 'vue-router';
           }
         ],
         categoriesOptions: [],
-        filteredMovies: [],
+        ratingsOptions: [],
         preFilter: [],
+        feedData: []
       }
     },
     methods: {
@@ -496,20 +508,32 @@ import { RouterLink, RouterView } from 'vue-router';
         let categories = this.movieData.map((movie) => movie.category);
         this.categoriesOptions = [...new Set(categories)];
       },
-      categorySelection() {
-        this.preFilter = this.movieData;
+      ratingsList() {
+        let ratings = this.movieData.map((movie) => movie.rating);
+        this.ratingsOptions = [...new Set(ratings)];
+      },
+      filterSelection() {
+        this.clearFilters();
+
         const categorySelection = this.movieData.filter(movie => {
           return movie.category === this.entertainmentCategory;
         });
-        this.filteredMovies = categorySelection;
-        this.movieData = this.filteredMovies;
+        const ratingSelection = this.movieData.filter(movie => {
+          return movie.rating === this.entertainmentRating;
+        });
+
+        const joinFilters = [...categorySelection, ...ratingSelection];
+        const duplicatesFilters = joinFilters => joinFilters.filter((item, index) => joinFilters.indexOf(item) !== index);
+        this.feedData = duplicatesFilters(joinFilters);
       },
       clearFilters() {
-        this.movieData = this.preFilter;
+        this.feedData = this.movieData;
       }
     },
     beforeMount() {
+      this.clearFilters();
       this.categoriesList();
+      this.ratingsList();
     },
   }
 </script>
