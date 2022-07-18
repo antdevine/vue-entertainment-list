@@ -7,6 +7,11 @@
       </div>
     </form>
 
+    <form id="search">
+      <label for="seach">Search:</label>
+      <input type="text" id="search" name="seach" v-model="searchInput"><br><br>
+    </form>
+
     <form id="ratings">
       <h3>Ratings</h3>
       <div v-for="(rating, index) in this.ratingsOptions" :key="index">
@@ -14,27 +19,35 @@
       </div>
     </form>
 
-    <input type="button" value="Clear filters" @click="clearFilters" />
+    <input type="button" value="Clear filters and Search" @click="clearFilters" />
     <input type="button" value="Submit filter" @click="filterSelection" />
 
-    <RouterLink :to="{ path: `/movie/${index}`}" v-for="(movie, index) in this.feedData" :key="index">
-      <MovieList 
-      :movieid="index" 
-      :movieTitle="movie.title" 
-      :movieImg="movie.thumbnail.regular.medium" 
+      <MovieList v-for="(movie, index) in this.feedData" :key="index"
+        :movieid="index" 
+        :movieTitle="movie.title" 
+        :movieImg="movie.thumbnail.regular.medium"
+        @addFavourites="addToFavourites" 
       />
-    </RouterLink>
+
+      <FavouritesList v-for="(favourite, index) in this.favourites" :key="index" 
+        :favouriteId="index"
+        :favouriteTitle="favourite.title"
+        @removeFavourites="removeFromFavourites"
+      />
+    
     <p v-if="this.feedData.length == 0">No movies in this filter, please clear filter and try again</p>
   </main>
 </template>
 
 <script>
 import { RouterLink, RouterView } from 'vue-router';
-  import MovieList from '@/components/MovieList.vue'
+import MovieList from '@/components/MovieList.vue';
+import FavouritesList from '@/components/FavouritesList.vue';
 
   export default {
     components: {
       MovieList,
+      FavouritesList,
     },
     data() {
       return {
@@ -500,7 +513,9 @@ import { RouterLink, RouterView } from 'vue-router';
         categoriesOptions: [],
         ratingsOptions: [],
         preFilter: [],
-        feedData: []
+        feedData: [],
+        searchInput: '',
+        favourites: []
       }
     },
     methods: {
@@ -518,6 +533,7 @@ import { RouterLink, RouterView } from 'vue-router';
         const categorySelection = this.movieData.filter(movie => {
           return movie.category === this.entertainmentCategory;
         });
+
         const ratingSelection = this.movieData.filter(movie => {
           return movie.rating === this.entertainmentRating;
         });
@@ -525,9 +541,44 @@ import { RouterLink, RouterView } from 'vue-router';
         const joinFilters = [...categorySelection, ...ratingSelection];
         const duplicatesFilters = joinFilters => joinFilters.filter((item, index) => joinFilters.indexOf(item) !== index);
         this.feedData = duplicatesFilters(joinFilters);
+
+        if (this.searchInput.length) {
+          const searchFilter = duplicatesFilters(joinFilters).filter((movie) => {
+              return movie.title
+              .toUpperCase()
+              .includes(this.searchInput.toUpperCase())
+             });
+             this.feedData = searchFilter;
+        }
       },
       clearFilters() {
         this.feedData = this.movieData;
+      },
+      addToFavourites(id) {
+        if (!this.favourites.includes(this.movieData[id])) {
+          this.favourites.push(this.movieData[id]);
+        }
+      },
+      removeFromFavourites(id) {
+        console.log(id, 'id');
+        // if (this.favourites.includes(this.movieData[id])) {
+        //   this.favourites.push(this.movieData[id]);
+        // }
+        // const edittedList = this.favourites.filter((items, index) => {
+        //     return items[index] !== id;
+        //   });
+        // this.favourites = edittedList;
+        // console.log(edittedList, 'edittedList');
+
+
+        // const index = this.favourites.indexOf(id);
+
+        // if (index > -1) {
+        //     this.favourites.splice(index, 1);
+        // }
+
+        const filtered = this.favourites.filter(fruit => fruit[id] !== id);
+        console.log(filtered, 'filtered');
       }
     },
     beforeMount() {

@@ -2,6 +2,9 @@
     <div>
         <h2>{{movieTitle}}</h2>
         <img :src="movieImg" />
+        {{movieid}}
+        <RouterLink :to="{ path: `/movie/${movieid}`}">Go to movie</RouterLink>
+        <button @click="$emit('addFavourites', movieid)">Add to favourites</button>
     </div>
 </template>
 
@@ -20,6 +23,10 @@ export default {
 
     },
     props: {
+        movieid: {
+            type: Number,
+            required: true
+        },
         movieTitle: {
             type: String,
             required: false
