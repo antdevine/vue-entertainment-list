@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <button @click="sortedArray">
+    <button @click="sortAscending">
       Sort name by {{nameSort}}
     </button>
 
@@ -559,7 +559,7 @@ import FavouritesList from '@/components/FavouritesList.vue';
         this.feedData = duplicatesFilters(joinFilters).length ? duplicatesFilters(joinFilters) : noDuplicates;
 
         if (this.searchInput.length) {
-          const searchFilter = duplicatesFilters(joinFilters).filter((movie) => {
+          const searchFilter = this.feedData.filter((movie) => {
               return movie.title
               .toUpperCase()
               .includes(this.searchInput.toUpperCase())
@@ -574,6 +574,7 @@ import FavouritesList from '@/components/FavouritesList.vue';
         this.feedData = this.movieData;
         this.entertainmentCategory = '';
         this.entertainmentRating = '';
+        this.searchInput = '';
       },
       addToFavourites(id) {
         if (!this.favourites.includes(this.movieData[id])) {
@@ -586,35 +587,35 @@ import FavouritesList from '@/components/FavouritesList.vue';
       },
       toggleModal() {
         this.modal = !this.modal;
-      }
+      },
+      sortAscending() {
+        console.log('were sorting');
+        let sortedData = this.movieData;
+        if(this.nameSort === "Ascending") {
+            sortedData = sortedData.sort((a,b) => {
+                let fa = a.title.toLowerCase(), fb = b.title.toLowerCase();
+                if (fa < fb) {
+                    return -1
+                }
+                if (fa > fb) {
+                    return 1
+                }
+                
+                return 0
+            })
+            this.nameSort = "Descending"
+        }
+        else {
+            sortedData.reverse();
+            this.nameSort = "Ascending"
+        }
+        this.movieData = sortedData;
+      },
     },
     beforeMount() {
       this.resetFeed();
       this.categoriesList();
       this.ratingsList();
-    },
-    sortedArray() {
-      console.log('were sorting');
-      let sortedData = this.movieData;
-      if(this.nameSort === "Ascending") {
-          sortedData = sortedData.sort((a,b) => {
-              let fa = a.name.toLowerCase(), fb = b.name.toLowerCase();
-              if (fa < fb) {
-                  return -1
-              }
-              if (fa > fb) {
-                  return 1
-              }
-              
-              return 0
-          })
-          this.nameSort = "Descending"
-      }
-      else {
-          sortedData.reverse();
-          this.nameSort = "Ascending"
-      }
-      this.movieData = sortedData;
     },
   }
 </script>
