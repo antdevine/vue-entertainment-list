@@ -18,6 +18,7 @@
   import { def } from '@vue/shared';
 </script>
 
-<style>
-  @import '@/assets/base.css';
+<style lang="scss">
+  @import "./assets/base.css";
+  @import "./assets/styles.scss";
 </style>

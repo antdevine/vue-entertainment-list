@@ -589,7 +589,6 @@ import FavouritesList from '@/components/FavouritesList.vue';
         this.modal = !this.modal;
       },
       sortAscending() {
-        console.log('were sorting');
         let sortedData = this.movieData;
         if(this.nameSort === "Ascending") {
             sortedData = sortedData.sort((a,b) => {
