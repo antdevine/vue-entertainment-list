@@ -543,7 +543,7 @@ import FavouritesList from '@/components/FavouritesList.vue';
         this.ratingsOptions = [...new Set(ratings)];
       },
       filterSelection() {
-        this.clearFilters();
+        this.resetFeed();
 
         const categorySelection = this.movieData.filter(movie => {
           return movie.category === this.entertainmentCategory;
@@ -554,8 +554,9 @@ import FavouritesList from '@/components/FavouritesList.vue';
         });
 
         const joinFilters = [...categorySelection, ...ratingSelection];
-        const duplicatesFilters = joinFilters => joinFilters.filter((item, index) => joinFilters.indexOf(item) !== index);
-        this.feedData = duplicatesFilters(joinFilters);
+        const noDuplicates = joinFilters.length ? joinFilters : this.movieData;
+        const duplicatesFilters = joinFilters => joinFilters.filter((item, index) => (joinFilters.indexOf(item) !== index));
+        this.feedData = duplicatesFilters(joinFilters).length ? duplicatesFilters(joinFilters) : noDuplicates;
 
         if (this.searchInput.length) {
           const searchFilter = duplicatesFilters(joinFilters).filter((movie) => {
@@ -566,8 +567,13 @@ import FavouritesList from '@/components/FavouritesList.vue';
              this.feedData = searchFilter;
         }
       },
+      resetFeed() {
+        this.feedData = this.movieData;
+      },
       clearFilters() {
         this.feedData = this.movieData;
+        this.entertainmentCategory = '';
+        this.entertainmentRating = '';
       },
       addToFavourites(id) {
         if (!this.favourites.includes(this.movieData[id])) {
@@ -583,7 +589,7 @@ import FavouritesList from '@/components/FavouritesList.vue';
       }
     },
     beforeMount() {
-      this.clearFilters();
+      this.resetFeed();
       this.categoriesList();
       this.ratingsList();
     },
