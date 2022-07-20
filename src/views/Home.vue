@@ -22,17 +22,30 @@
     <input type="button" value="Clear filters and Search" @click="clearFilters" />
     <input type="button" value="Submit filter" @click="filterSelection" />
 
+    <input type="button" @click="toggleModal" value="View your favourites">
+
+    <div id="myModal" class="modal" v-show="modal">
+      <div class="modal-content">
+        <span class="close" @click="toggleModal">&times;</span>
+        
+        <FavouritesList v-for="(favourite, index) in this.favourites" :key="index" 
+          :favouriteId="index"
+          :favouriteTitle="favourite.title"
+          @removeFavourites="removeFromFavourites"
+        />
+        <p v-if="this.favourites.length == 0">No movies in your favourites, please add some</p>
+      </div>
+    </div>
+
+    <button @click="sortedArray">
+      Sort name by {{nameSort}}
+    </button>
+
       <MovieList v-for="(movie, index) in this.feedData" :key="index"
         :movieid="index" 
         :movieTitle="movie.title" 
         :movieImg="movie.thumbnail.regular.medium"
         @addFavourites="addToFavourites" 
-      />
-
-      <FavouritesList v-for="(favourite, index) in this.favourites" :key="index" 
-        :favouriteId="index"
-        :favouriteTitle="favourite.title"
-        @removeFavourites="removeFromFavourites"
       />
     
     <p v-if="this.feedData.length == 0">No movies in this filter, please clear filter and try again</p>
@@ -515,7 +528,9 @@ import FavouritesList from '@/components/FavouritesList.vue';
         preFilter: [],
         feedData: [],
         searchInput: '',
-        favourites: []
+        favourites: [],
+        modal: false,
+        nameSort: "Ascending",
       }
     },
     methods: {
@@ -559,26 +574,12 @@ import FavouritesList from '@/components/FavouritesList.vue';
           this.favourites.push(this.movieData[id]);
         }
       },
-      removeFromFavourites(id) {
-        console.log(id, 'id');
-        // if (this.favourites.includes(this.movieData[id])) {
-        //   this.favourites.push(this.movieData[id]);
-        // }
-        // const edittedList = this.favourites.filter((items, index) => {
-        //     return items[index] !== id;
-        //   });
-        // this.favourites = edittedList;
-        // console.log(edittedList, 'edittedList');
-
-
-        // const index = this.favourites.indexOf(id);
-
-        // if (index > -1) {
-        //     this.favourites.splice(index, 1);
-        // }
-
-        const filtered = this.favourites.filter(fruit => fruit[id] !== id);
-        console.log(filtered, 'filtered');
+      removeFromFavourites(title) {
+        const filtered = this.favourites.filter(favourite => favourite.title !== title);
+        this.favourites = filtered;
+      },
+      toggleModal() {
+        this.modal = !this.modal;
       }
     },
     beforeMount() {
@@ -586,5 +587,67 @@ import FavouritesList from '@/components/FavouritesList.vue';
       this.categoriesList();
       this.ratingsList();
     },
+    sortedArray() {
+      console.log('were sorting');
+      let sortedData = this.movieData;
+      if(this.nameSort === "Ascending") {
+          sortedData = sortedData.sort((a,b) => {
+              let fa = a.name.toLowerCase(), fb = b.name.toLowerCase();
+              if (fa < fb) {
+                  return -1
+              }
+              if (fa > fb) {
+                  return 1
+              }
+              
+              return 0
+          })
+          this.nameSort = "Descending"
+      }
+      else {
+          sortedData.reverse();
+          this.nameSort = "Ascending"
+      }
+      this.movieData = sortedData;
+    },
   }
 </script>
+
+<style scoped>
+  .modal {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+  }
+
+  /* The Close Button */
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    z-index: 999999;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+</style>

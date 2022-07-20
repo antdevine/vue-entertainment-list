@@ -1,7 +1,7 @@
 <template>
     <div>
         <h2>{{favouriteTitle}}</h2>
-        <button @click="$emit('removeFavourites', favouriteId)">Remove from favourites</button>
+        <button @click="$emit('removeFavourites', favouriteTitle)">Remove from favourites</button>
     </div>
 </template>
 
@@ -22,10 +22,6 @@ export default {
     props: {
         favouriteTitle: {
             type: String,
-            required: true
-        },
-        favouriteId: {
-            type: Number,
             required: true
         }
     }
